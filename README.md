@@ -109,11 +109,10 @@ Connectivity validated with `ping`:
 
 ## Repository Structure
 
-> ✏️ *Adjust to match the actual files once organized in the repo, for example:*
 
 ```
-├── packet-tracer/       # Cisco Packet Tracer project file (.pkt)
-├── subnetting/           # Subnet calculations / documentation
-├── configs/               # Switch and router configuration exports
+├── PacketTracer/       # Cisco Packet Tracer project file (.pkt)
+├── Documentation/           # Documentation and delivery
+├── Subnetting/               # Subnet calculations
 └── README.md
 ```
