@@ -1,65 +1,119 @@
-# Physical Space — Device Interconnection
+# Device Interconnection — ICPC Network Design
 
-**Activity — Tecnológico de Monterrey**
-
-## Authors
-
-- Regina Fernanda Portela Palacios (A01786698)
-- Aixa Elenka Mendoza Filisola (A01782727)
-- Paulina Cortez Balvanera (A01782041)
-- Nicolás Casillas Larrañaga (A01787292)
+**Final Project**
+Tecnológico de Monterrey
 
 ## Overview
 
-This project proposes a physical venue and network layout for hosting a competition-style event on campus. Based on the problem statement, the event requires a minimum capacity of **204 people**: 6 teams of 30 participants, 10 judges, 2 venue administrators, and 12 additional judges. This minimum capacity was used as the primary filter to shortlist candidate spaces at Campus Santa Fe.
+This project designs, subnets, costs, and simulates (in Cisco Packet Tracer) the campus network infrastructure required to host the **ICPC (International Collegiate Programming Contest)** at Tecnológico de Monterrey.
 
-## Venue Selection Process
+## Introduction
 
-Spaces that could not accommodate the minimum required capacity were discarded early on, including:
+- **Event:** ICPC — International Collegiate Programming Contest
+- **Venue:** Tecnológico de Monterrey
+- **Network requirements:**
+  - Avoid overload
+  - Access to contest platforms and BOCA (the online contest administration system)
+  - Reliable communication between organizers
 
-- **EGADE Floor 7**, various auditoriums, and small classrooms — capacity range of 14 to 155 people
-- **SUM A4N2** — max capacity of 200 people, 15 x 15 m — discarded for being too tight for the group size
+## Problem Statement
 
-### Candidates considered
+The network needed to:
+- Integrate into the existing campus infrastructure
+- Avoid IP address conflicts
+- Guarantee stable connectivity
+- Stay up under a large number of simultaneous users
 
-| Venue | Capacity | Notes |
-|---|---|---|
-| Femsa Building, Floor 7 | 100 people | Spacious, panoramic view, enclosed space |
-| SUM A4N2 | 200 people | Flexible space in the Aulas 4 building |
-| Salón de Congresos | 700 people | Located at the central esplanade, enclosed, versatile |
+## Objectives
 
-*Source: TEC Venue*
+1. **Analyze network requirements**
+2. **Design the architecture**
+3. **Implement and validate connectivity**
 
-## Selected Options
+## Capacity Requirements
 
-### Option A: Salón de Congresos (primary recommendation)
-- Capacity of ~700 people, enclosed — important given the amount of computer equipment involved.
-- Can be divided into up to ten independent rooms, useful for further separating teams if needed.
-- Located near the labs and storage rooms, convenient for extra materials or connections during the competition.
-- Well suited for long working sessions.
+Minimum capacity of **204 people**:
+- 6 teams (30 people each)
+- 10 judges
+- 2 administrators
+- 12 coaches
 
-### Option B: Arena Borregos (secondary alternative)
-- One of the largest spaces on campus, normally used for sports events with large audiences.
-- Enough room to create an appropriate, spacious layout and even add extra areas.
-- One of the only other enclosed spaces able to hold the entire group together.
-- Slightly harder to connect to the network, since it's farther from where resources and connections are centralized.
-- Distance between teams could exceed the required safe distance.
+**Infrastructure components:** switches, routers, an access point, and PCs.
 
-**Recommendation:** Salón de Congresos, due to its proximity to resources — pending confirmation of availability, as it is one of the most requested venues for events at Campus Santa Fe.
+## Network Design
 
-## Network Layout
+- A hand-sketched layout maps cabling, switches, and routers across the venue (see the Salón de Congresos layout from the earlier venue-selection proposal).
+- Implemented and simulated in **Cisco Packet Tracer**:
+  - A central router (`Router-Central`) connects to switches `SW-Central-1`, `SW-Central-2`, and `SW-Central-3`.
+  - Six team segments (Equipo 1–6), each with its own access switch, color-coded (red, orange, yellow, green, cyan, purple) in the topology.
+  - Dedicated PCs for judges (`PC-Jueces`) and administrators (`PC-Admins`).
+  - An access point (`AP-Coaches`) for the coaches segment.
+- **Internet egress design:** a DNS server (`Server-PT`, 8.8.8.8) and routers (`RSocioFormador`, `RProfesor`) provide access to external services (`www.facebook.com`, `mitec.itesm.mx`, `www.cisco.com`, `www.tec.mx`) and campus-assigned IPs via DHCP. Each team connects to a specific FastEthernet port on the switch based on team number (e.g. Team 3 → FE0/3, Team 10 → FE0/10).
 
-Sketches were made for the network resource distribution in each venue, including computer tables, switches, routers, and cabling.
+## Subnetting
 
-- **Alternative A (Salón de Congresos):** cabling runs along the perimeter connecting multiple switch/router clusters distributed across six computer table groups within the auditorium space.
-- **Alternative B (Arena Borregos):** essentially the same layout pattern, adapted to the court's dimensions — team spacing here is looser and may exceed the required safe distance.
+| Segment | Hosts Required | Prefix | Subnet Mask | Assigned Block | First Valid IP | Last Valid IP |
+|---|---|---|---|---|---|---|
+| Team 1 | 39/64 | /26 | 255.255.255.192 | 172.20.24.0 – 172.20.24.63 | 172.20.24.1 | 172.20.24.62 |
+| Team 2 | 39/64 | /26 | 255.255.255.192 | 172.20.24.64 – 172.20.24.127 | 172.20.24.65 | 172.20.24.126 |
+| Team 3 | 39/64 | /26 | 255.255.255.192 | 172.20.24.128 – 172.20.24.191 | 172.20.24.129 | 172.20.24.190 |
+| Team 4 | 39/64 | /26 | 255.255.255.192 | 172.20.24.192 – 172.20.24.255 | 172.20.24.193 | 172.20.24.254 |
+| Team 5 | 39/64 | /26 | 255.255.255.192 | 172.20.25.0 – 172.20.25.63 | 172.20.25.1 | 172.20.25.62 |
+| Team 6 | 39/64 | /26 | 255.255.255.192 | 172.20.25.64 – 172.20.25.127 | 172.20.25.65 | 172.20.25.126 |
+| Coaches | 16/32 | /27 | 255.255.255.224 | 172.20.25.128 – 172.20.25.159 | 172.20.25.129 | 172.20.25.158 |
+| Judges | 13/16 | /28 | 255.255.255.240 | 172.20.25.160 – 172.20.25.175 | 172.20.25.161 | 172.20.25.174 |
+| Admin | 13/16 | /28 | 255.255.255.240 | 172.20.25.176 – 172.20.25.191 | 172.20.25.177 | 172.20.25.190 |
 
-*(See the original document for the annotated floor-plan diagrams.)*
+## Equipment & Costs
 
-## References
+*Internet egress hardware costs are not included.*
 
-- TEC. (n.d.). *TEC Venues.* https://tec.mx/es/venues/santa-fe
+| Equipment | Model | Qty | Unit Cost (USD) | Total (USD) |
+|---|---|---|---|---|
+| Router | Cisco ISR-4331 | 1 | $4,316 | $4,316 |
+| Distribution switch | Cisco 24TT 2960 | 3 | $1,424 | $4,272 |
+| Access switch | Cisco 2960 | 6 | $960 | $5,760 |
+| Access point | AP-PT | 1 | $650 | $650 |
+| PCs (students) | Standard PC | 180 | $500 | $90,000 |
+| PCs (judges) | Standard PC | 10 | $500 | $5,000 |
+| PCs (administrators) | Standard PC | 2 | $500 | $1,000 |
+| **Total** | | | | **$110,998** |
 
-## Collaborative Work Evidence
+## Switch Configuration (excerpt)
 
-Included in the appendix of the source document (team working session photo).
+Sample configuration for `SW-E1` (Team 1's access switch): access ports assigned to VLAN 10 (`switchport access vlan 10`, `switchport mode access`), a trunk port for uplink, disabled/unused VLAN 1 management interface, and password-protected console (`line con 0`) and VTY (`line vty`) access.
+
+## Testing
+
+Connectivity validated with `ping`:
+- **Team 1 → Team 4:** 4/4 packets received, 0% loss (avg. round-trip ~2 ms)
+- **Team 1 → Internet (8.8.8.8):** 4/4 packets received, 0% loss (avg. round-trip ~5 ms)
+
+## Evaluation & Results
+
+- Achieved a functional network
+- Efficient segmentation
+- Stable connections to the campus network
+
+## Known Issues
+
+- Connecting the internet egress required rework
+- The overall proposal had to be redesigned to get everything connected
+- Overload on Central Switch 1
+
+## Conclusion & Future Work
+
+- The network meets the stated requirements and performs efficiently
+- The simulation passes all connectivity tests
+- **Next step:** build the network physically, beyond the Packet Tracer simulation
+
+## Repository Structure
+
+> ✏️ *Adjust to match the actual files once organized in the repo, for example:*
+
+```
+├── packet-tracer/       # Cisco Packet Tracer project file (.pkt)
+├── subnetting/           # Subnet calculations / documentation
+├── configs/               # Switch and router configuration exports
+└── README.md
+```
